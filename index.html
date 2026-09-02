@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KENLUCIO EDITION 2.5 — Mobile Studio</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --card-bg: #15171e;
+            --accent-color: #00f2fe;
+            --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            --text-color: #f0f0f5;
+            --text-dim: #9092a1;
+            --border-color: #262938;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        header p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            background: #0d0e12;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            border-color: #00f2fe;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .ratio-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .ratio-btn {
+            background: #0d0e12;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ratio-btn.active {
+            background: var(--accent-gradient);
+            color: #000;
+            border-color: transparent;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button.generate-btn {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 10px;
+            padding: 16px;
+            color: #000;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+            transition: transform 0.1s ease;
+        }
+
+        button.generate-btn:active {
+            transform: scale(0.98);
+        }
+
+        .player-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+            display: none;
+        }
+
+        .placeholder-text {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .download-btn {
+            display: none;
+            width: 100%;
+            background: #10b981;
+            color: #fff;
+            text-align: center;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+
+        .loader {
+            display: none;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>KENLUCIO EDITION 2.5</h1>
+        <p>Seedance 2.5 Engine — Mobile Studio</p>
+    </header>
+
+    <div class="card">
+        <div class="field-group">
+            <label>Generation Mode</label>
+            <select id="genMode" onchange="toggleInputs()">
+                <option value="T2V">Text to Video (T2V)</option>
+                <option value="I2V">Image to Video (I2V)</option>
+                <option value="V2V">Video to Video (V2V)</option>
+            </select>
+        </div>
+
+        <div class="field-group">
+            <label>Prompt / Scene Description</label>
+            <textarea id="prompt" placeholder="Describe camera motion, action, lighting, visual details..."></textarea>
+        </div>
+
+        <div class="field-group" id="mediaUrlGroup" style="display: none;">
+            <label id="mediaUrlLabel">Reference Media URL</label>
+            <input type="text" id="mediaUrl" placeholder="https://example.com/image.jpg">
+        </div>
+
+        <div class="field-group">
+            <label>Aspect Ratio</label>
+            <div class="ratio-selector">
+                <div class="ratio-btn active" id="btn169" onclick="setRatio('16:9')">16:9 Cinematic</div>
+                <div class="ratio-btn" id="btn916" onclick="setRatio('9:16')">9:16 Vertical</div>
+            </div>
+        </div>
+
+        <div class="row-2">
+            <div class="field-group">
+                <label>Duration</label>
+                <select id="duration">
+                    <option value="8">8 Seconds</option>
+                    <option value="10">10 Seconds</option>
+                    <option value="15">15 Seconds</option>
+                    <option value="25">25 Seconds</option>
+                    <option value="30" selected>30 Seconds</option>
+                    <option value="60">1 Minute</option>
+                    <option value="120">2 Minutes</option>
+                    <option value="180">3 Minutes</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label>Camera Motion</label>
+                <select id="camera">
+                    <option value="pan_left">Pan Left</option>
+                    <option value="pan_right">Pan Right</option>
+                    <option value="zoom_in">Zoom In</option>
+                    <option value="zoom_out">Zoom Out</option>
+                    <option value="dolly_3d">3D Dolly Track</option>
+                    <option value="tracking_lock">Subject Motion Lock</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field-group">
+            <label>VFX Preset</label>
+            <select id="vfx">
+                <option value="none">None (Photoreal Raw)</option>
+                <option value="cyberpunk">Cyberpunk Neon</option>
+                <option value="cinematic">Cinematic 35mm Grain</option>
+                <option value="anime">Anime / Cell Shaded</option>
+                <option value="glitch">Digital Glitch VFX</option>
+            </select>
+        </div>
+
+        <div class="field-group">
+            <label>BytePlus / ModelArk API Key</label>
+            <input type="text" id="apiKey" value="EMBEDDED_KENLUCIO_KEY_2_5" placeholder="Enter API Key">
+        </div>
+
+        <button class="generate-btn" onclick="startGeneration()">Generate Video</button>
+    </div>
+
+    <div class="card player-card">
+        <div class="loader" id="loader"></div>
+        <div class="placeholder-text" id="statusText">Your generated video will auto-play here immediately upon completion.</div>
+        <video id="videoPlayer" controls autoplay loop playsinline></video>
+        <a id="downloadBtn" class="download-btn" download="KENLUCIO_EDITION_2.5.mp4">Download MP4 Video</a>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
